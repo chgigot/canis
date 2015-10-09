@@ -1,6 +1,6 @@
 #' canis: canopy file investigator and shreder
 #'
-#' @import dplyr rgl
+#' @importFrom magrittr %>%
 #' @docType package
 #' @name canis
 NULL

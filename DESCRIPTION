@@ -6,7 +6,9 @@ Date: 2015-10-08
 Authors@R: as.person("Christophe Gigot <ch.gigot@gmail.com> [aut, cre]")
 Description: More about what it does (maybe more than one line)
 Imports:
+    magrittr,
     dplyr,
+    tidyr,
     rgl
 License: What license is it under?
 LazyData: TRUE
