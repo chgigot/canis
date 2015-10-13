@@ -12,4 +12,9 @@ readCan(filePath)
 \description{
 Read .can files from .can files and save the information in a data.frame.
 }
+\details{
+The data are stored in a data frame where the first columns correspond to
+ID and characteristics of the polygons. The last columns contains the points
+coordinates, one column per point. The list-columns in data frames.
+}
 

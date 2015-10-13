@@ -3,7 +3,12 @@
 #'
 #' Read .can files from .can files and save the information in a data.frame.
 #'
+#' The data are stored in a data frame where the first columns correspond to
+#' ID and characteristics of the polygons. The last columns contains the points
+#' coordinates, one column per point. The list-columns in data frames.
+#'
 #' @param filePath The name of the file which the data are to be read from.
+#'
 #'
 #' @export
 #------------------------------------------------------------------------------#
@@ -42,6 +47,17 @@ readCan <- function(filePath) {
                  sep =  c(-12, -7, -4),
                  convert = TRUE)
 
+    fun <- function(x) {
+        res <- matrix(x, nrow=3, ncol=3, byrow=TRUE)
+        dimnames(res) <- list(NULL, c("x", "y", "z"))
+        return(list(res))
+        }
+
+    vertices <- do.call(c, apply(rawData %>% select(v1x:v3z), 1, fun))
+
+    rawData <- rawData %>% select(primitive_type:nVertices)
+    rawData$vertices <- vertices
+
     #writeOBJ("visuCan.obj")
     return(rawData)
 }
@@ -59,16 +75,18 @@ readCan <- function(filePath) {
 #'
 #' @export
 #------------------------------------------------------------------------------#
-can3d <- function(data, fraction = 1.0) {
-    vertices <- data %>% dplyr::select(v1x:v3z) # Deals with triangles only
-    vertices <- vertices %>% dplyr::sample_frac(fraction)
+canopy3d <- function(data, fraction = 1.0, ...) {
+    # TODO: check if Class = can...
+    subData  <- data %>% dplyr::sample_frac(fraction)
+    vertices <- subData$vertices
     indices  <- 1:3 # Deals with triangles only
 
-    tmesh3ds <- apply(vertices, 1, function(x){
-        normal <- 1.0 # TODO: À approfondir!
-        x <- c(x[1:3], normal, x[4:6], normal, x[7:9], normal)
-        rgl::tmesh3d(x, indices)
+    tmesh3ds <- lapply(vertices, function(x){
+        normal  <- 1.0 # TODO: À approfondir!
+        polygon <- cbind(x, normal = normal)
+        mesh3d  <- rgl::tmesh3d(as.vector(t(polygon)), indices)
+        return(mesh3d)
     })
 
-    return(rgl::shapelist3d(tmesh3ds, col = rgb(0, 0.7, 0)))#, alpha = 0.2)
+    return(rgl::shapelist3d(tmesh3ds, ...))#col = rgb(0, 0.7, 0)))#, alpha = 0.2)
 }
