@@ -101,7 +101,8 @@ canopy3d <- function(data, fraction = 1.0, colBy, ...) {
 
     # Because apply() change every factor as a characher,
     # and we want the levels (numeric, not letters,...)
-    subData <- subData %>% purrr::map_if(is.factor, as.numeric)
+    i <- sapply(subData, is.factor)
+    subData[i] <- lapply(subData[i], as.numeric)
 
     tmesh3ds <- apply(subData, 1, function(x){
         vertices <- x$vertices
