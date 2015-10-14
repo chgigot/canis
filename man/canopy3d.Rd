@@ -4,7 +4,7 @@
 \alias{canopy3d}
 \title{3D canopy visualization}
 \usage{
-canopy3d(data, fraction = 1, ...)
+canopy3d(data, fraction = 1, colBy, ...)
 }
 \arguments{
 \item{data}{A data frame containing canopy data.}

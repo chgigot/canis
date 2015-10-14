@@ -53,10 +53,15 @@ readCan <- function(filePath) {
         return(list(res))
         }
 
-    vertices <- do.call(c, apply(rawData %>% select(v1x:v3z), 1, fun))
+    vertices <- do.call(c, apply(rawData %>% dplyr::select(v1x:v3z), 1, fun))
 
-    rawData <- rawData %>% select(primitive_type:nVertices)
+    rawData <- rawData %>% dplyr::select(primitive_type:nVertices)
+    #rawData[] <- lapply(rawData, as.factor)
+    rawData <- rawData %>% dplyr::mutate_each(dplyr::funs(as.factor))
     rawData$vertices <- vertices
+
+    #class(rawData) <- "Canopy" # plus data.frame... effet indésirable avec dplyr?
+    comment(rawData) <- "CanopyDescription"
 
     #writeOBJ("visuCan.obj")
     return(rawData)
@@ -75,16 +80,40 @@ readCan <- function(filePath) {
 #'
 #' @export
 #------------------------------------------------------------------------------#
-canopy3d <- function(data, fraction = 1.0, ...) {
+canopy3d <- function(data, fraction = 1.0, colBy, ...) {
+
     # TODO: check if Class = can...
+    if (comment(data) != "CanopyDescription") stop("data: wrong object.")
+
+    if (!missing(colBy)) {
+        if (colBy %in% names(data)) {
+            #RColorBrewer::brewer.pal(8, "Dark2")
+            cols <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+                      "#66A61E", "#E6AB02", "#A6761D", "#666666")
+            attr(cols, "length") <- length(cols)
+        } else {
+            warning("colBy does not exist.")
+        }
+    }
+
     subData  <- data %>% dplyr::sample_frac(fraction)
-    vertices <- subData$vertices
     indices  <- 1:3 # Deals with triangles only
 
-    tmesh3ds <- lapply(vertices, function(x){
+    # Because apply() change every factor as a characher,
+    # and we want the levels (numeric, not letters,...)
+    subData <- subData %>% purrr::map_if(is.factor, as.numeric)
+
+    tmesh3ds <- apply(subData, 1, function(x){
+        vertices <- x$vertices
         normal  <- 1.0 # TODO: À approfondir!
-        polygon <- cbind(x, normal = normal)
-        mesh3d  <- rgl::tmesh3d(as.vector(t(polygon)), indices)
+        polygon <- cbind(vertices, normal = normal)
+        if (exists("cols")) {
+            id <- x[[colBy]] # apply a générer une liste d'éléments
+            mesh3d  <- rgl::tmesh3d(as.vector(t(polygon)), indices,
+                                    material = list(color = cols[(id %% attr(cols, "length")) + 1]))
+        } else {
+            mesh3d  <- rgl::tmesh3d(as.vector(t(polygon)), indices)
+        }
         return(mesh3d)
     })
 

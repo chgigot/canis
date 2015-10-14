@@ -9,6 +9,7 @@ Imports:
     magrittr,
     dplyr,
     tidyr,
+    purrr,
     rgl
 License: What license is it under?
 LazyData: TRUE
