@@ -59,6 +59,7 @@ readCan <- function(filePath) {
     #rawData[] <- lapply(rawData, as.factor)
     rawData <- rawData %>% dplyr::mutate_each(dplyr::funs(as.factor))
     rawData$vertices <- vertices
+    attr(rawData$vertices, "class") <- "AsIs"
 
     #class(rawData) <- c("data.frame", "Canopy") # plus data.frame... effet indésirable avec dplyr?
     #comment(rawData) <- "CanopyDescription"
