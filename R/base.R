@@ -60,13 +60,14 @@ readCan <- function(filePath) {
     rawData <- rawData %>% dplyr::mutate_each(dplyr::funs(as.factor))
     rawData$vertices <- vertices
 
-    #class(rawData) <- "Canopy" # plus data.frame... effet indésirable avec dplyr?
-    comment(rawData) <- "CanopyDescription"
+    #class(rawData) <- c("data.frame", "Canopy") # plus data.frame... effet indésirable avec dplyr?
+    #comment(rawData) <- "CanopyDescription"
 
     #writeOBJ("visuCan.obj")
     return(rawData)
 }
 
+#str.Canopy <- function(object, ...) str(as.data.frame(object), max.level = 1, ...)
 
 #------------------------------------------------------------------------------#
 #' 3D canopy visualization
@@ -80,19 +81,47 @@ readCan <- function(filePath) {
 #'
 #' @export
 #------------------------------------------------------------------------------#
-canopy3d <- function(data, fraction = 1.0, colBy, ...) {
+canopy3d <- function(data, fraction = 1.0, color, ...) {
 
     # TODO: check if Class = can...
-    if (comment(data) != "CanopyDescription") stop("data: wrong object.")
+    #if (!is(data, "Canopy")) stop("data: wrong object.")
+    dots <- list(...)
 
-    if (!missing(colBy)) {
-        if (colBy %in% names(data)) {
+    if (!missing(color)) {
+        if (color %in% names(data)) {
             #RColorBrewer::brewer.pal(8, "Dark2")
             cols <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A",
                       "#66A61E", "#E6AB02", "#A6761D", "#666666")
             attr(cols, "length") <- length(cols)
         } else {
-            warning("colBy does not exist.")
+            dots$color <- color
+            #dots <- list(...)
+            #ndots <- length(dots)
+            #stuff
+            #
+
+            # http://stackoverflow.com/questions/2436688/append-an-object-to-a-list-in-r-in-amortized-constant-time
+
+
+            #
+            #        list_ = {
+            #           a <- list(0)
+            #           for(i in 1:n) {a <- list(a, list(i))}
+            #       },
+
+
+            # Initial list:
+            #List <- list()
+
+            # Now the new experiments
+            #for(i in 1:3){
+            #    List[[length(List)+1]] <- list(sample(1:3))
+            #}
+
+            #List
+
+
+
         }
     }
 
@@ -109,14 +138,17 @@ canopy3d <- function(data, fraction = 1.0, colBy, ...) {
         normal  <- 1.0 # TODO: À approfondir!
         polygon <- cbind(vertices, normal = normal)
         if (exists("cols")) {
-            id <- x[[colBy]] # apply a générer une liste d'éléments
-            mesh3d  <- rgl::tmesh3d(as.vector(t(polygon)), indices,
-                                    material = list(color = cols[(id %% attr(cols, "length")) + 1]))
+            id <- x[[color]] # apply a générer une liste d'éléments
+            args <- list(as.vector(t(polygon)), indices,
+                         material = list(color = cols[(id %% attr(cols, "length")) + 1]))
         } else {
-            mesh3d  <- rgl::tmesh3d(as.vector(t(polygon)), indices)
+            args <- list(as.vector(t(polygon)), indices)
         }
+        mesh3d <- do.call(rgl::tmesh3d, args)
         return(mesh3d)
     })
+    LIST <- append(list(shapes = tmesh3ds), dots)
+    return(do.call(rgl::shapelist3d, LIST))#col = rgb(0, 0.7, 0)))#, alpha = 0.2)
 
-    return(rgl::shapelist3d(tmesh3ds, ...))#col = rgb(0, 0.7, 0)))#, alpha = 0.2)
+    #return(rgl::shapelist3d(tmesh3ds, ...))
 }
