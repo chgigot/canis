@@ -8,7 +8,12 @@
 heron <- function(x) {
     if (length(x) != 3) stop("Error.")
     s <- sum(x) / 2
-    return(sqrt(s * (s - x[1]) * (s - x[2]) * (s - x[3])))
+    m <- s * (s - x[1]) * (s - x[2]) * (s - x[3])
+    if (m < 0) { # Could arrive sometimes when 2 points are almost confonded (due to approximation in calculation/machinery limits)
+        return(0)
+    } else {
+        return(sqrt(m))
+    }
 }
 
 #------------------------------------------------------------------------------#

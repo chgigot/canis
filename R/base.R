@@ -84,6 +84,9 @@ readCan <- function(filePath) {
 #------------------------------------------------------------------------------#
 canopy3d <- function(data, fraction = 1.0, color, ...) {
 
+    ## Sécurité : vérifier si vertices est présent avant tout
+    ## Sécurité : vérifier que tout le reste == facteur !!! Très important pour couleur !!
+
     # TODO: check if Class = can...
     #if (!is(data, "Canopy")) stop("data: wrong object.")
     dots <- list(...)
@@ -135,7 +138,7 @@ canopy3d <- function(data, fraction = 1.0, color, ...) {
     subData[i] <- lapply(subData[i], as.numeric)
 
     tmesh3ds <- apply(subData, 1, function(x){
-        vertices <- x$vertices
+        vertices <- x$vertices ## Sécurité : vérifier si vertices est présent avant tout
         normal  <- 1.0 # TODO: À approfondir!
         polygon <- cbind(vertices, normal = normal)
         if (exists("cols")) {
