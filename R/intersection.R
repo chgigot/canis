@@ -1,42 +1,49 @@
 #------------------------------------------------------------------------------#
-#' Heron's formula
-#'
-#' Compute the area of a triangle knowing only the lengths of its three sides.
-#'
-#' @param x A vector containing the lengths of the triangle sides.
+#' @include canopy.R
+#' @include volume-set.R
+#------------------------------------------------------------------------------#
+NULL
+
+#------------------------------------------------------------------------------#
+# Heron's formula
+#
+# Compute the area of a triangle knowing only the lengths of its three sides.
+#
+# @param x A vector containing the lengths of the triangle sides.
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
 heron <- function(x) {
-    if (length(x) != 3) stop("Error.")
+    stopifnot(length(x) == 3)
     s <- sum(x) / 2
     m <- s * (s - x[1]) * (s - x[2]) * (s - x[3])
-    if (m < 0) { # Could arrive sometimes when 2 points are almost confonded (due to approximation in calculation/machinery limits)
-        return(0)
-    } else {
-        return(sqrt(m))
-    }
+    # Even if it's not supposed to occur in theory, we need to check that m > 0.
+    # Due to numeric limit, we can get negative numbers.
+    if (m < 0) return(0)
+    else       return(sqrt(m))
 }
 
 #------------------------------------------------------------------------------#
-#' Triangle area
-#'
-#' ...
-#'
-#' @param x A matrix containing the coordinates of the triangle. Each row
-#'     corresponds to a points, and each column to a dimension (x, y and z).
-#'
-#' @export
+# Triangle area
+#
+# To do.
+#
+# @param x A matrix containing the coordinates of the triangle. Each row
+#     corresponds to a points, and each column to a dimension (x, y and z).
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
 area <- function(x) {
-    distances <- as.vector(dist(x)) ### Vérifier manuellement pour qq triangles. # Distances between the rows of a data matrix
+    distances <- as.vector(dist(x))
     return(heron(distances))
 }
 
 #------------------------------------------------------------------------------#
-#' Compute coordinates of the interesect point
-#'
-#' TODO.
-#'
-#' @keywords internal
+# Compute coordinates of the interesect point
+#
+# To do.
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
 getIntersectPoint <- function(p1, p2, p3part) {
     if (length(na.omit(p3part)) != 1) stop("Error in ppart.")
@@ -47,20 +54,20 @@ getIntersectPoint <- function(p1, p2, p3part) {
 
 
 #------------------------------------------------------------------------------#
-#' Compute coordinates of the middle point
-#'
-#' TODO.
-#'
-#' @keywords internal
+# Compute coordinates of the middle point
+#
+# To do.
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
 getMidPoint <- function(p1, p2) return((p1 + p2) / 2)
 
 #------------------------------------------------------------------------------#
-#' is in volume ?
-#'
-#' TODO.
-#'
-#' @keywords internal
+# is in volume ?
+#
+# To do.
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
 belongToVolume <- function(volume, point) {
 
@@ -74,13 +81,24 @@ belongToVolume <- function(volume, point) {
 }
 
 #------------------------------------------------------------------------------#
-#' Shred a triangle into pieces
-#'
-#' Shred a triangle into four smaller triangles
-#'
-#' @export
+# Interection between canopy polygons and a cube
+#
+# Check if each triangle is inside or outside the volume.
+# Shred a triangle into four smaller triangles
+#
+# The "cube" should have all its sides parallel to an origin axis (current
+# restriction).
+#
+# @param x A matrix containing the coordinates of the triangle. Each row
+#     corresponds to a points, and each column to a dimension (x, y and z).
+# @param volume A 3-component matrix of coordinates of a "cube".
+# @param epsilon The area limit below which no triangle is to be shreded
+#     anymore.
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
-shred <- function(x, volume, verticesInside, both, PPART3) {
+intersectPolygon <- function(polygon, volume, shred = TRUE, epsilon = 1e-6) {
+
     # One situation is not taken into account here:
     #
     #              | /| A
@@ -91,27 +109,6 @@ shred <- function(x, volume, verticesInside, both, PPART3) {
     #           /     |
     #        C /______| B
     #
-
-}
-
-#------------------------------------------------------------------------------#
-#' Interection between canopy polygons and a cube
-#'
-#' Check if each triangle is inside or outside the volume.
-#' Shred a triangle into four smaller triangles
-#'
-#' The "cube" should have all its sides parallel to an origin axis (current
-#' restriction).
-#'
-#' @param x A matrix containing the coordinates of the triangle. Each row
-#'     corresponds to a points, and each column to a dimension (x, y and z).
-#' @param volume A 3-component matrix of coordinates of a "cube".
-#' @param epsilon The area limit below which no triangle is to be shreded
-#'     anymore.
-#'
-#' @export
-#------------------------------------------------------------------------------#
-containPolygon <- function(polygon, volume, shred = TRUE, epsilon = 1e-6) {
 
     # Récupération des mins et maxs du volume
     xs <- unique(volume[,1])
@@ -280,7 +277,7 @@ containPolygon <- function(polygon, volume, shred = TRUE, epsilon = 1e-6) {
 
     res <- NULL
     if (length(newPolygons) != 0) {
-        res <- do.call(c, lapply(newPolygons, containPolygon, volume, shred, epsilon))
+        res <- do.call(c, lapply(newPolygons, intersectPolygon, volume, shred, epsilon))
     } else {
         ##res <- list(vertices = x, inside = triangleInside)
         res <- list(list(polygon = polygon, inside = polygonInside))
@@ -289,28 +286,23 @@ containPolygon <- function(polygon, volume, shred = TRUE, epsilon = 1e-6) {
 }
 
 #------------------------------------------------------------------------------#
-#' Interection between canopy polygons and a cube
-#'
-#' Check if each triangle is inside or outside the volume.
-#' Shred a triangle into four smaller triangles
-#'
-#' The "cube" should have all its sides parallel to an origin axis (current
-#' restriction).
-#'
-#' #@param x A matrix containing the coordinates of the triangle. Each row
-#'     corresponds to a points, and each column to a dimension (x, y and z).
-#' #@param volume A 3-component matrix of coordinates of a "cube".
-#' #@param epsilon The area limit below which no triangle is to be shreded
-#'     anymore.
-#'
-#' #@export
+# Interection between canopy polygons and a cube
+#
+# Check if each triangle is inside or outside the volume.
+# Shred a triangle into four smaller triangles
+#
+# The "cube" should have all its sides parallel to an origin axis (current
+# restriction).
+#
+# @param x A matrix containing the coordinates of the triangle. Each row
+#     corresponds to a points, and each column to a dimension (x, y and z).
+# @param volume A 3-component matrix of coordinates of a "cube".
+# @param epsilon The area limit below which no triangle is to be shreded
+#     anymore.
+#
+# @keywords internal
 #------------------------------------------------------------------------------#
-#contain <- function(x, volume, shred = TRUE, epsilon = 1e-6) UseMethod("contain")
-
-#------------------------------------------------------------------------------#
-#' @export
-#------------------------------------------------------------------------------#
-containCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
+intersectCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
 
     env <- environment()
     counter <- 0
@@ -318,7 +310,7 @@ containCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
 
     res <- apply(can, 1, function(x) {
         #browser()
-        val <- containPolygon(x$vertices, volume, shred, epsilon)
+        val <- intersectPolygon(x$vertices, volume, shred, epsilon)
         x$vertices <- NULL
         x <- data.frame(x, stringsAsFactors = FALSE)
         x <- x[rep(1, length(val)), ]
@@ -333,9 +325,99 @@ containCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
         })
     #res <- do.call(rbind, res) ### Très très long !!!!!
     res <- dplyr::bind_rows(res)
+    class(res$vertices) <- "AsIs"
     #res <- res %>% dplyr::mutate_each(dplyr::funs(as.factor))
     return(res)
 }
 
 
+#------------------------------------------------------------------------------#
+#' Split a whole canopy in accordance with a set of volumes
+#'
+#' Each polygon of the canopy that is included in one of the provided volumes is
+#' allocated to this volume. If a polygon crosses one or several sides of a
+#' volume and if the parameter \code{shred} is set to \code{TRUE}, then the
+#' polygon is recursively shreded into smaller polygons until none of them (with
+#' an area > \code{epsilon}) crosses the volume sides anymore.
+#'
+#' @param canopy A \code{Canopy} object.
+#' @param volumeSet A \code{VolumeSet} object.
+#' @param shred Logical. Should an intersected polygon be shreded into smaller
+#'   polygons?
+#' @param epsilon Minimal polygon area to take into account.
+#' @param parallel Logical. Parallelization activation.
+#' @param nCores Number of cores to use if \code{parallel} is set to \code{TRUE}.
+#'
+#' @return A \code{c("Canopy", "data.frame")} object containing only the
+#' polygons that were successfully allocated to a volume.
+#'
+#' @examples
+#' canopy  <- readCan("/path/to/file/field.can")
+#' rangeDim <- function(can, dim) {
+#'     range(sapply(can$vertices, function(i) range(i[, dim])))
+#' }
+#' volumes <- makeVolumeSet(rangeDim(canopy, "x"),
+#'                          rangeDim(canopy, "y"),
+#'                          rangeDim(canopy, "z"),
+#'                          intervals = rep(3, 3))
+#' allocatedPolygons <- splitCanopy(canopy, volumes, shred = TRUE,
+#'                                  parallel = TRUE, nCores = 8)
+#'
+#' @export
+#------------------------------------------------------------------------------#
+splitCanopy <- function(canopy, volumeSet, shred = TRUE, epsilon = 1e-6,
+                  parallel = FALSE, nCores = 2) {
+
+    case <- NA
+
+    if (requireNamespace("parallel", quietly = TRUE)) {
+        if (parallel) {
+            warning(paste0("Parallelization is an experimental feature. ",
+                           "In addition, progress bar may not be ",
+                           "displayed when activated."))
+            case <- "parallel"
+        } else {
+            case <- "no-parallel"
+        }
+    } else {
+        if (parallel) {
+            warning("Package 'parallel' needs to be installed to activate parallelization feature.")
+        }
+        case <- "no-parallel"
+    }
+
+    switch (case,
+        "no-parallel" = {
+            res <- lapply(seq_len(nrow(volumeSet)), function(i) {
+                res <- intersectCanopy(canopy, volumeSet[i, ]$vertices[[1]], shred, epsilon) # Check if volume != list
+                res <- res %>% dplyr::filter(inside == TRUE) %>% dplyr::select(-inside)
+                res$volumeID <- volumeSet[i, ]$volumeID
+
+                tmp <- res$vertices
+                res <- res %>% dplyr::select(-vertices)
+                res$vertices <- tmp
+
+                return(res)
+            })
+        },
+        "parallel"    = {
+            res <- parallel::mclapply(seq_len(nrow(volumeSet)), function(i) {
+                res <- intersectCanopy(canopy, volumeSet[i, ]$vertices[[1]], shred, epsilon)  # Check if volume != list
+                res <- res %>% dplyr::filter(inside == TRUE) %>% dplyr::select(-inside)
+                res$volumeID <- volumeSet[i, ]$volumeID
+
+                tmp <- res$vertices
+                res <- res %>% dplyr::select(-vertices)
+                res$vertices <- tmp
+
+                return(res)
+            }, mc.cores = nCores)
+        }
+    )
+
+    res <- res %>% dplyr::bind_rows()
+    class(res$vertices) <- "AsIs"
+    class(res) <- c("Canopy", "data.frame")
+    return(res)
+}
 

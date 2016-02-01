@@ -1,12 +1,12 @@
-# canis: canopy file investigator and shreder
+# canis: Canopy File Investigator and Shreder
 
-canis is a toolbox to work with canopy files (extension: .can) such as the ones that may be generated using the framework OpenAlea (<https://github.com/openalea/openalea>).
+canis is a toolkit to deal with so called "canopy files" (extension: .can) such as the ones that may be generated using the framework OpenAlea (<https://github.com/openalea/openalea>).
 
 ## Installation
 
-Get the development version from github:
+You can install the latest development version from github with (in R console):
 
-```R
-# install.packages("devtools")
+```r
+install.packages("devtools")
 devtools::install_github("chgigot/canis")
 ```
