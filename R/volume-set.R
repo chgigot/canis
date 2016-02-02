@@ -78,20 +78,21 @@ buildGrid3d <- function(xlim, ylim, zlim, intervals) {
 #------------------------------------------------------------------------------#
 #' Build a set of regular volumes
 #'
-#' Useful
+#' To do.
 #'
 #' Note that the plotting process may be time-consuming with a large number of
 #' polygons. Consider using the parameter \code{fraction} to plot only a random
-#' subset of all the polygons. You can have only one volume in your
-#' set of volumes.
+#' subset of all the polygons. You can have only one volume in your set of
+#' volumes.
 #'
-#' @param rangeX,rangeY,rangeZ Min and max for each dimension.
+#' @param x,y,z Vectors of length two containing the min and max values for each
+#'   dimension.
 #' @param intervals A numeric vector of length 3, with numbers (greater than or
-#'     equal to 1) giving the numbers of intervals into which x, y ans z are to
-#'     be cut.
-#' @param label Do the volumes need to be labelized? Either "auto" or a character
-#' vector of length equals to the number of volumes must be provided.
-#' @param dataFrame return as data frame. Useful to work with \code{dplyr} package.
+#'   equal to 1) giving the numbers of intervals into which x, y ans z are to be
+#'   cut.
+#' @param label Do the volumes need to be labelized? Either "auto" or a
+#'   character vector of length equals to the number of volumes must be
+#'   provided.
 #'
 #' @return An object of class \code{c("VolumeSet", "data.frame")}.
 #'
@@ -107,30 +108,24 @@ buildGrid3d <- function(xlim, ylim, zlim, intervals) {
 #'
 #' @export
 #------------------------------------------------------------------------------#
-makeVolumeSet <- function(rangeX, rangeY, rangeZ, intervals = rep(1, 3),
-                         label = "auto", onlyVertices = FALSE){
-    vertices <- buildGrid3d(rangeX, rangeY, rangeZ, intervals)
+makeVolumeSet <- function(x, y, z, intervals = rep(1, 3), label = "auto"){
+    vertices <- buildGrid3d(x, y, z, intervals)
 
-    if (onlyVertices) {
-        if (length(vertices) == 1) return(vertices[[1]])
-        else                       return(vertices)
+    if (length(label) == 1 & label[[1]] == "auto") {
+        volumeID  <- giveVolumeID(vertices)
     } else {
-        if (length(label) == 1 & label[[1]] == "auto") {
-            volumeID  <- giveVolumeID(vertices)
+        if (length(label) != length(vertices)) {
+            stop("Error...!!!")
         } else {
-            if (length(label) != length(vertices)) {
-                stop("Error...!!!")
-            } else {
-                volumeID <- label
-            }
+            volumeID <- label
         }
-        volumes   <- data.frame(volumeID = volumeID,
-                                vertices = I(vertices),
-                                stringsAsFactors = FALSE)
-
-        class(volumes) <- c("VolumeSet", "data.frame")
-        return(volumes)
     }
+    volumes   <- data.frame(volumeID = volumeID,
+                            vertices = I(vertices),
+                            stringsAsFactors = FALSE)
+
+    class(volumes) <- c("VolumeSet", "data.frame")
+    return(volumes)
 }
 
 #------------------------------------------------------------------------------#

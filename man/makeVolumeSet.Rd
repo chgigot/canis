@@ -4,32 +4,31 @@
 \alias{makeVolumeSet}
 \title{Build a set of regular volumes}
 \usage{
-makeVolumeSet(rangeX, rangeY, rangeZ, intervals = rep(1, 3), label = "auto",
-  onlyVertices = FALSE)
+makeVolumeSet(x, y, z, intervals = rep(1, 3), label = "auto")
 }
 \arguments{
-\item{rangeX, rangeY, rangeZ}{Min and max for each dimension.}
+\item{x, y, z}{Vectors of length two containing the min and max values for each
+dimension.}
 
 \item{intervals}{A numeric vector of length 3, with numbers (greater than or
-equal to 1) giving the numbers of intervals into which x, y ans z are to
-be cut.}
+equal to 1) giving the numbers of intervals into which x, y ans z are to be
+cut.}
 
-\item{label}{Do the volumes need to be labelized? Either "auto" or a character
-vector of length equals to the number of volumes must be provided.}
-
-\item{dataFrame}{return as data frame. Useful to work with \code{dplyr} package.}
+\item{label}{Do the volumes need to be labelized? Either "auto" or a
+character vector of length equals to the number of volumes must be
+provided.}
 }
 \value{
 An object of class \code{c("VolumeSet", "data.frame")}.
 }
 \description{
-Useful
+To do.
 }
 \details{
 Note that the plotting process may be time-consuming with a large number of
 polygons. Consider using the parameter \code{fraction} to plot only a random
-subset of all the polygons. You can have only one volume in your
-set of volumes.
+subset of all the polygons. You can have only one volume in your set of
+volumes.
 }
 \examples{
 canopy  <- readCan("/path/to/file/field.can")
