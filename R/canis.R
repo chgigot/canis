@@ -9,8 +9,8 @@
 #' volumes must be a rectangular parallelepiped with sides parallel to x, y, or
 #' z axes.
 #'
-#' @importFrom magrittr %>%
 #' @docType package
 #' @name canis
+#' @importFrom magrittr %>%
 #------------------------------------------------------------------------------#
 NULL

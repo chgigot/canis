@@ -45,12 +45,12 @@ area <- function(x) {
 #
 # @keywords internal
 #------------------------------------------------------------------------------#
-getIntersectPoint <- function(p1, p2, p3part) {
-    if (length(na.omit(p3part)) != 1) stop("Error in ppart.")
-    i <- which(!is.na(p3part))
-    k <- (p3part[i] - p1[i]) / (p2[i] - p1[i])
-    return(p1 + k * (p2 - p1))
-}
+# getIntersectPoint <- function(p1, p2, p3part) {
+#     if (length(na.omit(p3part)) != 1) stop("Error in ppart.")
+#     i <- which(!is.na(p3part))
+#     k <- (p3part[i] - p1[i]) / (p2[i] - p1[i])
+#     return(p1 + k * (p2 - p1))
+# }
 
 
 #------------------------------------------------------------------------------#
@@ -69,16 +69,15 @@ getMidPoint <- function(p1, p2) return((p1 + p2) / 2)
 #
 # @keywords internal
 #------------------------------------------------------------------------------#
-belongToVolume <- function(volume, point) {
-
-    if ((point["x"] >= xs[1]) & (point["x"] <= xs[2]) &
-        (point["y"] >= ys[1]) & (point["y"] <= ys[2]) &
-        (point["z"] >= zs[1]) & (point["z"] <= zs[2])) {
-        return(TRUE)
-    } else {
-        return(FALSE)
-    }
-}
+# belongToVolume <- function(volume, point) {
+#     if ((point["x"] >= xs[1]) & (point["x"] <= xs[2]) &
+#         (point["y"] >= ys[1]) & (point["y"] <= ys[2]) &
+#         (point["z"] >= zs[1]) & (point["z"] <= zs[2])) {
+#         return(TRUE)
+#     } else {
+#         return(FALSE)
+#     }
+# }
 
 #------------------------------------------------------------------------------#
 # Interection between canopy polygons and a cube
@@ -311,6 +310,7 @@ intersectCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
     res <- apply(can, 1, function(x) {
         #browser()
         val <- intersectPolygon(x$vertices, volume, shred, epsilon)
+        #!!!!!!!#if (is.null(val)) return(data.frame(NULL))
         x$vertices <- NULL
         x <- data.frame(x, stringsAsFactors = FALSE)
         x <- x[rep(1, length(val)), ]
@@ -323,10 +323,11 @@ intersectCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
 
         return(x)
         })
+
     #res <- do.call(rbind, res) ### Très très long !!!!!
     res <- dplyr::bind_rows(res)
     class(res$vertices) <- "AsIs"
-    #res <- res %>% dplyr::mutate_each(dplyr::funs(as.factor))
+    class(res) <- c("Canopy", "data.frame")
     return(res)
 }
 
@@ -352,16 +353,21 @@ intersectCanopy <- function(can, volume, shred = TRUE, epsilon = 1e-6) {
 #' polygons that were successfully allocated to a volume.
 #'
 #' @examples
-#' canopy  <- readCan("/path/to/file/field.can")
 #' rangeDim <- function(can, dim) {
 #'     range(sapply(can$vertices, function(i) range(i[, dim])))
 #' }
-#' volumes <- makeVolumeSet(rangeDim(canopy, "x"),
-#'                          rangeDim(canopy, "y"),
-#'                          rangeDim(canopy, "z"),
+#' volumes <- makeVolumeSet(rangeDim(plants, "x"),
+#'                          rangeDim(plants, "y"),
+#'                          rangeDim(plants, "z"),
 #'                          intervals = rep(3, 3))
-#' allocatedPolygons <- splitCanopy(canopy, volumes, shred = TRUE,
+#' \donttest{
+#' # With no parallelization:
+#' allocatedPolygons <- splitCanopy(plants, volumes, shred = TRUE)
+#'
+#' # With parallelization (experimental feature):
+#' allocatedPolygons <- splitCanopy(plants, volumes, shred = TRUE,
 #'                                  parallel = TRUE, nCores = 8)
+#' }
 #'
 #' @export
 #------------------------------------------------------------------------------#
@@ -391,8 +397,10 @@ splitCanopy <- function(canopy, volumeSet, shred = TRUE, epsilon = 1e-6,
             res <- lapply(seq_len(nrow(volumeSet)), function(i) {
                 res <- intersectCanopy(canopy, volumeSet[i, ]$vertices[[1]], shred, epsilon) # Check if volume != list
                 res <- res %>% dplyr::filter(inside == TRUE) %>% dplyr::select(-inside)
-                res$volumeID <- volumeSet[i, ]$volumeID
 
+                if (nrow(res) == 0) return(res) # ou break??? Et que se passe-t-il si rien du tout dans le volume ???
+
+                res$volumeID <- volumeSet[i, ]$volumeID
                 tmp <- res$vertices
                 res <- res %>% dplyr::select(-vertices)
                 res$vertices <- tmp
@@ -404,8 +412,10 @@ splitCanopy <- function(canopy, volumeSet, shred = TRUE, epsilon = 1e-6,
             res <- parallel::mclapply(seq_len(nrow(volumeSet)), function(i) {
                 res <- intersectCanopy(canopy, volumeSet[i, ]$vertices[[1]], shred, epsilon)  # Check if volume != list
                 res <- res %>% dplyr::filter(inside == TRUE) %>% dplyr::select(-inside)
-                res$volumeID <- volumeSet[i, ]$volumeID
 
+                if (nrow(res) == 0) return(res) # ou break??? Et que se passe-t-il si rien du tout dans le volume ???
+
+                res$volumeID <- volumeSet[i, ]$volumeID
                 tmp <- res$vertices
                 res <- res %>% dplyr::select(-vertices)
                 res$vertices <- tmp
@@ -415,9 +425,21 @@ splitCanopy <- function(canopy, volumeSet, shred = TRUE, epsilon = 1e-6,
         }
     )
 
-    res <- res %>% dplyr::bind_rows()
+    res <- res %>% dplyr::bind_rows() # Et que se passe-t-il si rien du tout dans le volume ???
     class(res$vertices) <- "AsIs"
     class(res) <- c("Canopy", "data.frame")
     return(res)
+
+    ### C'est le problème du 0/NULL ci-dessous.... TO FIX!
+    #> truc <- data.frame()
+    #> class(truc) <- c("Canopy", "data.frame")
+    #> truc
+    #data frame with 0 columns and 0 rows
+    #> display3d(truc)
+    #Show Traceback
+    #
+    #Rerun with Debug
+    #Error in `[.default`(subData, i) : invalid subscript type 'list'
+
 }
 

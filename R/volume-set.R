@@ -97,13 +97,12 @@ buildGrid3d <- function(xlim, ylim, zlim, intervals) {
 #' @return An object of class \code{c("VolumeSet", "data.frame")}.
 #'
 #' @examples
-#' canopy  <- readCan("/path/to/file/field.can")
 #' rangeDim <- function(can, dim) {
 #'     range(sapply(can$vertices, function(i) range(i[, dim])))
 #' }
-#' volumes <- makeVolumeSet(rangeDim(canopy, "x"),
-#'                          rangeDim(canopy, "y"),
-#'                          rangeDim(canopy, "z"),
+#' volumes <- makeVolumeSet(rangeDim(plants, "x"),
+#'                          rangeDim(plants, "y"),
+#'                          rangeDim(plants, "z"),
 #'                          intervals = rep(3, 3))
 #'
 #' @export

@@ -1,10 +1,12 @@
 Package: canis
 Type: Package
 Title: Canopy File Investigator and Shreder
-Version: 0.1.0
-Date: 2016-01-31
+Version: 0.1.1
+Date: 2016-05-01
 Authors@R: as.person("Christophe Gigot <ch.gigot@gmail.com> [aut, cre]")
-Description: More about what it does (maybe more than one line)
+Description: canis is a toolkit to deal with so called "canopy files"
+    (extension: .can) such as the ones that may be generated using the
+    framework OpenAlea
 URL: https://github.com/chgigot/canis
 Depends:
     R (>= 3.2.0)
@@ -19,6 +21,7 @@ RoxygenNote: 5.0.1
 Collate:
     'canis.R'
     'canopy.R'
+    'data.R'
     'volume-set.R'
     'intersection.R'
     'plot.R'

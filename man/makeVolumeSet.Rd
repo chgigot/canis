@@ -31,13 +31,12 @@ subset of all the polygons. You can have only one volume in your set of
 volumes.
 }
 \examples{
-canopy  <- readCan("/path/to/file/field.can")
 rangeDim <- function(can, dim) {
     range(sapply(can$vertices, function(i) range(i[, dim])))
 }
-volumes <- makeVolumeSet(rangeDim(canopy, "x"),
-                         rangeDim(canopy, "y"),
-                         rangeDim(canopy, "z"),
+volumes <- makeVolumeSet(rangeDim(plants, "x"),
+                         rangeDim(plants, "y"),
+                         rangeDim(plants, "z"),
                          intervals = rep(3, 3))
 
 }

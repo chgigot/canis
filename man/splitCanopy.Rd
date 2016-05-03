@@ -33,16 +33,21 @@ polygon is recursively shreded into smaller polygons until none of them (with
 an area > \code{epsilon}) crosses the volume sides anymore.
 }
 \examples{
-canopy  <- readCan("/path/to/file/field.can")
 rangeDim <- function(can, dim) {
     range(sapply(can$vertices, function(i) range(i[, dim])))
 }
-volumes <- makeVolumeSet(rangeDim(canopy, "x"),
-                         rangeDim(canopy, "y"),
-                         rangeDim(canopy, "z"),
+volumes <- makeVolumeSet(rangeDim(plants, "x"),
+                         rangeDim(plants, "y"),
+                         rangeDim(plants, "z"),
                          intervals = rep(3, 3))
-allocatedPolygons <- splitCanopy(canopy, volumes, shred = TRUE,
+\donttest{
+# With no parallelization:
+allocatedPolygons <- splitCanopy(plants, volumes, shred = TRUE)
+
+# With parallelization (experimental feature):
+allocatedPolygons <- splitCanopy(plants, volumes, shred = TRUE,
                                  parallel = TRUE, nCores = 8)
+}
 
 }
 

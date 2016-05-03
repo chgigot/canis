@@ -45,7 +45,6 @@ polygons. Consider using the parameter \code{fraction} when plotting a
 \code{Canopy} to only select a random subset of all the polygons.
 }
 \examples{
-plants <- readCan("/path/to/file/field.can")
 display3d(plants)
 display3d(plants, frac = 0.1)
 display3d(plants, col = rgb(0, 0.7, 0))
@@ -66,7 +65,7 @@ display3d(volumes, color = "volumeID")
 
 }
 \seealso{
-\code{\link[rgl]{display3d}} in the \code{rgl} package for a more
+\code{\link[rgl]{shapelist3d}} in the \code{rgl} package for a more
   detailed explanation.
 }
 

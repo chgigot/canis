@@ -2,4 +2,8 @@
 .Rhistory
 .RData
 inst/doc
-vignettes/*.html
+*.html
+*.pdf
+*.docx
+*_cache/
+*_files/

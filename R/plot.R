@@ -32,7 +32,6 @@ NULL
 #' @return An object of class \code{c("shapelist3d", "shape3d")}.
 #'
 #' @examples
-#' plants <- readCan("/path/to/file/field.can")
 #' display3d(plants)
 #' display3d(plants, frac = 0.1)
 #' display3d(plants, col = rgb(0, 0.7, 0))
@@ -51,7 +50,7 @@ NULL
 #' display3d(volumes, color = "red", alpha = 0.3)
 #' display3d(volumes, color = "volumeID")
 #'
-#' @seealso \code{\link[rgl]{display3d}} in the \code{rgl} package for a more
+#' @seealso \code{\link[rgl]{shapelist3d}} in the \code{rgl} package for a more
 #'   detailed explanation.
 #'
 #' @name display3d

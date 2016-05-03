@@ -28,7 +28,7 @@ NULL
 #' @return An object of class \code{c("data.frame", "Canopy")}.
 #'
 #' @examples
-#' plants <- readCan("/path/to/file/field.can")
+#' plants <- readCan(system.file("extdata", "field1.can", package = "canis"))
 #'
 #' @export
 #------------------------------------------------------------------------------#

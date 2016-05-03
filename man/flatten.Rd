@@ -20,7 +20,6 @@ list-columns in order to get a regular data frame. This is for instance required
 to export a data frame in a file.
 }
 \examples{
-plants <- readCan("/path/to/file/field.can")
 flatPlants <- flatten(plants)
 filename <- tempfile(fileext = ".csv")
 write.csv(flatPlants, filename, row.names = FALSE)

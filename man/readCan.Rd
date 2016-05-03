@@ -34,7 +34,7 @@ column is a matrix. Each row of this matrix corresponds to the spatial
 coordinates of a vertex.
 }
 \examples{
-plants <- readCan("/path/to/file/field.can")
+plants <- readCan(system.file("extdata", "field1.can", package = "canis"))
 
 }
 
